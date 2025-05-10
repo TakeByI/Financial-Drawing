@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "71733050608",
+    "project_id": "financial-drawing",
+    "storage_bucket": "financial-drawing.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71733050608:android:6fefc0dcee7a7712b61635",
+        "android_client_info": {
+          "package_name": "com.example.financialdrawing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7bfGzem3i-mWSUm93nOioXOT2EMbpbLk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
