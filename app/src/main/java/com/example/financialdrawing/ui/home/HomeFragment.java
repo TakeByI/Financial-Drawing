@@ -37,22 +37,8 @@ public class HomeFragment extends Fragment {
         Toast.makeText(getContext(), auth.getCurrentUser().getEmail(), Toast.LENGTH_LONG).show();
 
         binding.buttonLogOut.setOnClickListener(v -> {
-            auth.signOut();
 
-            if (auth.getCurrentUser() == null) {
-                // Выход успешен
-                Toast.makeText(getContext(), "Вы вышли из аккаунта", Toast.LENGTH_SHORT).show();
-
-                // Переход на экран авторизации
-                Intent intent = new Intent(getContext(), AuthActivity.class);
-                startActivity(intent);
-                requireActivity().finish(); // Закрываем текущую активность, чтобы нельзя было вернуться назад
-            } else {
-                // Ошибка выхода (крайне редкий случай)
-                Toast.makeText(getContext(), "Ошибка выхода", Toast.LENGTH_SHORT).show();
-            }
         });
-
         return root;
     }
 

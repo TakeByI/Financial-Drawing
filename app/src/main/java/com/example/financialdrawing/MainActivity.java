@@ -1,9 +1,12 @@
 package com.example.financialdrawing;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -37,14 +40,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar);
-        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+        binding.appBarMain.fab.setOnClickListener(v -> {
+                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null)
                         .setAnchorView(R.id.fab).show();
             }
-        });
+
+        );
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
@@ -57,12 +59,35 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        //ТУТ ВЗАИМОДЕЙСТВУЕМ С ВЕРХНЕЙ ПАНЕЛЬКОЙ С ИНФОЙ ОБ АККАУНТЕ
         View headerView = navigationView.getHeaderView(0);
         emailTextView = headerView.findViewById(R.id.textViewEmail);
         if (firebaseAuth.getCurrentUser() != null && emailTextView != null) {
             emailTextView.setText(firebaseAuth.getCurrentUser().getEmail());
         }
+        Log.d("My Log", firebaseAuth.getCurrentUser().getDisplayName() != null ? firebaseAuth.getCurrentUser().getDisplayName() : "null");
+        Log.d("My Log", firebaseAuth.getCurrentUser().getPhoneNumber() != null ? firebaseAuth.getCurrentUser().getPhoneNumber() : "null");
+        //Log.d("My Log", firebaseAuth.getCurrentUser().getPhotoUrl().toString().isEmpty() ? firebaseAuth.getCurrentUser().getPhotoUrl().toString() : "null");
 
+        //КНОПКА ДЛЯ ВЫХОДА ИЗ АККАУНТА В МЕНЮШКЕ
+        navigationView.setNavigationItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_logout) {
+                firebaseAuth.signOut();
+                if (firebaseAuth.getCurrentUser() == null) {
+                    // Переход на экран входа
+                    startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                    finish();
+                    return true;
+                }
+                else {
+                    // Ошибка выхода (крайне редкий случай)
+                    Toast.makeText(getApplicationContext(), "Ошибка выхода", Toast.LENGTH_SHORT).show();
+                }
+            }
+            // Остальная логика навигации
+            return NavigationUI.onNavDestinationSelected(item, navController)
+                    || super.onOptionsItemSelected(item);
+        });
 
     }
 
