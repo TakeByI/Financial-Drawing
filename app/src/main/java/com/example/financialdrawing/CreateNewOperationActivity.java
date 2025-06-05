@@ -11,11 +11,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.financialdrawing.DataSamples.Operation;
+import com.example.financialdrawing.constants.FirebaseConstants;
 import com.example.financialdrawing.databinding.ActivityCreateNewOperationBinding;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +47,7 @@ public class CreateNewOperationActivity extends AppCompatActivity {
     private EditText titleOperationEditText;
     private EditText amountEditText;
     private EditText descriptionEditText;
+
 
     // Массив значений категорий
     private final static String[] categoriesExpense = {"Здоровье", "Досуг", "Дом", "Общепит", "Образование", "Подарки", "Продукты", "Семья", "Спорт", "Транспорт", "Другое"};
@@ -216,6 +219,39 @@ public class CreateNewOperationActivity extends AppCompatActivity {
         Timestamp createdAt = new Timestamp(calendar.getTime());
         String description = descriptionEditText.getText().toString();
 
+        // Валидация полей
+        if (title.isEmpty()) {
+            titleOperationEditText.setError("Введите название операции");
+            titleOperationEditText.requestFocus();
+            return;
+        }
+
+        if (amount.isEmpty()) {
+            amountEditText.setError("Введите сумму");
+            amountEditText.requestFocus();
+            return;
+        }
+
+        if (category.isEmpty()) {
+            categoryAutoCompleteTextView.setError("Выберите категорию");
+            categoryAutoCompleteTextView.requestFocus();
+            return;
+        }
+
+        try {
+            // Проверяем, что сумма - корректное число
+            double amountValue = Double.parseDouble(amount);
+            if (amountValue <= 0) {
+                amountEditText.setError("Сумма должна быть больше нуля");
+                amountEditText.requestFocus();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            amountEditText.setError("Некорректный формат суммы");
+            amountEditText.requestFocus();
+            return;
+        }
+
         Operation operation = new Operation(userId,
                 title,
                 isIncome,
@@ -225,14 +261,14 @@ public class CreateNewOperationActivity extends AppCompatActivity {
                 description
                 );
 
-        firebaseFirestore.collection("operations")
+        firebaseFirestore.collection(FirebaseConstants.COLLECTION_OPERATIONS)
                 .add(operation)
                 .addOnSuccessListener(documentReference -> {
-                    Log.d("My Log Firestore", "Операция сохранена с ID: " + documentReference.getId());
+                    Log.d(FirebaseConstants.LOG_FIRESTORE, "Операция сохранена с ID: " + documentReference.getId());
                     finish(); // Закрываем активити после сохранения
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("My Log Firestore", "Ошибка сохранения операции", e);
+                    Log.e(FirebaseConstants.LOG_FIRESTORE, "Ошибка сохранения операции", e);
                 });
     }
 
