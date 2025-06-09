@@ -11,9 +11,11 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.financialdrawing.DataSamples.Operation;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -24,6 +26,17 @@ public class OperationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static final int TYPE_ITEM = 1;
 
     private List<Object> items = new ArrayList<>();
+
+    private Map<Operation, String> operationIds = new HashMap<>();
+    private OnOperationClickListener listener;
+
+    public interface OnOperationClickListener {
+        void onOperationClick(String operationId);
+    }
+
+    public void setOnOperationClickListener(OnOperationClickListener listener) {
+        this.listener = listener;
+    }
 
     @Override
     public int getItemViewType(int position) {
@@ -48,7 +61,15 @@ public class OperationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (holder.getItemViewType() == TYPE_HEADER) {
             ((DateHeaderViewHolder)holder).bind((String)items.get(position));
         } else {
-            ((OperationViewHolder)holder).bind((Operation)items.get(position));
+            Operation operation = (Operation)items.get(position);
+            ((OperationViewHolder)holder).bind(operation);
+
+            holder.itemView.setOnClickListener(v -> {
+                String operationId = operationIds.get(operation);
+                if (listener != null && operationId != null) {
+                    listener.onOperationClick(operationId);
+                }
+            });
         }
     }
 
@@ -57,25 +78,32 @@ public class OperationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return items.size();
     }
 
-    public void setOperations(List<Operation> operations) {
+    public void setOperations(List<DocumentSnapshot> documents) {
         items.clear();
+        operationIds.clear();
 
         // Группируем операции по датам
         Map<String, List<Operation>> groupedOperations = new LinkedHashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("d MMMM", Locale.getDefault());
 
-        for (Operation op : operations) {
-            String dateKey = sdf.format(op.getCreatedAt().toDate());
-            if (!groupedOperations.containsKey(dateKey)) {
-                groupedOperations.put(dateKey, new ArrayList<>());
+        for (DocumentSnapshot doc : documents) {
+            Operation operation = doc.toObject(Operation.class);
+            if (operation != null) {
+                // Сохраняем соответствие между операцией и её ID
+                operationIds.put(operation, doc.getId());
+
+                String dateKey = sdf.format(operation.getCreatedAt().toDate());
+                if (!groupedOperations.containsKey(dateKey)) {
+                    groupedOperations.put(dateKey, new ArrayList<>());
+                }
+                groupedOperations.get(dateKey).add(operation);
             }
-            groupedOperations.get(dateKey).add(op);
         }
 
         // Добавляем заголовки и операции в список
         for (Map.Entry<String, List<Operation>> entry : groupedOperations.entrySet()) {
-            items.add(entry.getKey()); // Добавляем дату как заголовок
-            items.addAll(entry.getValue()); // Добавляем все операции за эту дату
+            items.add(entry.getKey());
+            items.addAll(entry.getValue());
         }
 
         notifyDataSetChanged();

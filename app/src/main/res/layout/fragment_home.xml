@@ -87,6 +87,14 @@
             android:text="Выбрать даты"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/chosenPeriodTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Период:"
+        android:textSize="20sp"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/operationRecyclerView"
         android:layout_width="match_parent"

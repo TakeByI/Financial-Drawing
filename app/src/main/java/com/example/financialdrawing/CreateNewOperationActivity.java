@@ -1,6 +1,7 @@
 package com.example.financialdrawing;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -265,6 +266,10 @@ public class CreateNewOperationActivity extends AppCompatActivity {
                 .add(operation)
                 .addOnSuccessListener(documentReference -> {
                     Log.d(FirebaseConstants.LOG_FIRESTORE, "Операция сохранена с ID: " + documentReference.getId());
+
+                    Intent resultIntent = new Intent();
+                    setResult(RESULT_OK, resultIntent);
+
                     finish(); // Закрываем активити после сохранения
                 })
                 .addOnFailureListener(e -> {
